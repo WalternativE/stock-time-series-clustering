@@ -75,4 +75,4 @@ We plan to learn the following things:
   for our financial time series
 - Perform different clustering techniques and compare their results with common domain knowledge
 - Compare changes in clusters over different time frames especially in relation to
-  different phases in economyc growth cycles
+  different phases in economic growth cycles
