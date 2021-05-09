@@ -1,0 +1,78 @@
+---
+title: "ALGO2 - Analysis Proposal"
+output:
+  html_notebook:
+    toc: TRUE
+date: 2021-05-09
+author: "Barkschat Jens, Beyerle Gregor"
+---
+
+## Outline
+
+The stock market offers a treasure trove of minutely kept time series data. Many
+hobbyists and researchers try to find the best forecasting models to make good
+investments but we can do than just try to predict the future.
+
+We have the idea that certain companies will most likely perform similarly over time
+and that we might be able to group them solely based on their performance rather than
+grouping them based on their sector (like bio-medical, high-tech and so on).
+
+We'll try to perform different cluster analyses based on the features of their
+price performance over time. Besides doing this over a long time frame
+(from 1999 to 2021) we will also attempt to use narrower time frames close to known
+times of crisis (like the dotcom bubble, the subprime crisis and so on).
+
+Additional to finding out how close certain companies are we'd also like to see
+if there are clusters of similar companies who perform equally well or bad in times
+of crisis and if this behavior stays relatively stable over time.
+
+## Dataset
+
+We constructed our dataset ourselves. We wanted to include data from the S&P 500
+index as it is rather broad high-quality index. We will use it to find possible
+companies to include in our analysis. The complete process how we constructed our
+dataset can be found in the `1__Data_Acquisition.Rmd` file.
+
+```{r}
+library(tidyverse)
+library(tsibble)
+
+ticker_data <- read_csv("data/ticker_values.csv",
+                        col_types = cols(
+                          price.open = col_double(),
+                          price.high = col_double(),
+                          price.low = col_double(),
+                          price.close = col_double(),
+                          volume = col_double(),
+                          price.adjusted = col_double(),
+                          ref.date = col_date(format = ""),
+                          ticker = col_character(),
+                          ret.adjusted.prices = col_double(),
+                          ret.closing.prices = col_double()
+                        )) %>%
+  as_tsibble(key = ticker, index = ref.date)
+
+ticker_data
+```
+
+We will mostly focus on the "simple" values in this dataset:
+
+- `price.open` the price when the market opened in USD
+- `price.high` the highest price on that day in USD
+- `price.low` the lowest price on that day in USD
+- `ref.date` the date of this observation
+- `ticker` the ticker symbol of the stock
+
+Our dataset contains 216 ticker symbols with `r nrow(ticker_data %>% filter(ticker == "AAPL"))`
+observations each. Observations can only happen on days where the markets are open
+so the gaps should be easy to fill.
+
+## Statistical Learning
+
+We plan to learn the following things:
+
+- Selecting the correct [time series features](https://otexts.com/fpp3/features.html)
+  for our financial time series
+- Perform different clustering techniques and compare their results with common domain knowledge
+- Compare changes in clusters over different time frames especially in relation to
+  different phases in economyc growth cycles

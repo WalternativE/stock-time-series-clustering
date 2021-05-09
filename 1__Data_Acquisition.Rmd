@@ -1,0 +1,112 @@
+---
+title: "Data Acquisition"
+date: 2021-05-09
+author: Barkschat Jens, Beyerle Gregor
+output:
+  html_notebook:
+    toc: TRUE
+---
+
+## Finding Possible Ticker Symbols
+
+As we're looking at S&P 500 data and plan to cluster the different companies
+with regard to their performance (and crisis performance) we'll try to get as many
+companies, that have been listed in the S&P 500 and exist to this day.
+
+
+```{r}
+library(tidyverse)
+library(tsibble)
+library(feasts)
+```
+
+We take all ticker symbols that have been in the S&P 500 since 1996. We use the
+tracking data supplied in this [repository](https://github.com/fja05680/sp500).
+
+```{r}
+s_and_p_movements <- read_csv("data/S&P_500_Historical_Components_and_Changes_2021_25_04.csv")
+```
+
+For all these years we'll collect all symbols and keep the unique ones for further processing.
+
+```{r}
+unique_ticker_symbols <- unique(unlist(strsplit(s_and_p_movements$tickers[1:10], split = ",")))
+length(unique_ticker_symbols)
+```
+
+## Check Ticker Symbol Availability
+
+We use the `TTR` package to find out which of those symbols are still commonly
+available. S&P 500 indizes are usually commonly traded but companies, that do not exist
+anymore will surely not be listed anymore.
+
+```{r}
+current_common_exchange_symbols <- TTR::stockSymbols()
+length(current_common_exchange_symbols$Symbol)
+```
+
+If our symbols aren't available anymore we will throw them out.
+
+```{r}
+is_currently_listed <- unique_ticker_symbols %in% current_common_exchange_symbols$Symbol
+still_listed_symbols <- unique_ticker_symbols[is_currently_listed]
+length(still_listed_symbols)
+```
+
+```{r}
+still_listed_symbols
+```
+
+## Collect Ticker Data
+
+We will use the remaining 276 symbols and lookup the daily stock data for them.
+In the background this will call the Yahoo stock information service.
+We include all datapoints up to 2021-05-09 and try to go back to 1991 so we'd have
+still a year of data before the dotcom bubble burst.
+
+```{r}
+start_date <- as.Date("1999-01-01")
+end_date <- as.Date("2021-05-09")
+freqency <- "daily"
+
+lookup_output <- BatchGetSymbols::BatchGetSymbols(tickers = still_listed_symbols,
+                                                  first.date = start_date,
+                                                  last.date = end_date,
+                                                  freq.data = freqency,
+                                                  cache.folder = file.path(tempdir(), "BGS_Cache"))
+```
+
+Because we can't sensibly impute data for these financial time series we'll only
+include symbols for which there are all price data available.
+
+```{r}
+good_to_go_symbols <- lookup_output$df.control %>%
+  filter(perc.benchmark.dates == 1.0) %>%
+  (function (x) { x$ticker })
+
+ticker_values <- lookup_output$df.tickers %>%
+  filter(ticker %in% good_to_go_symbols) %>%
+  as_tsibble(key = ticker, index = ref.date)
+
+ticker_values
+```
+
+## Quick Sanity Check
+
+At this point we have complete daily time series for 216 ticker symbols.
+We can plot the daily closing prices for one symbol (AAPL for Apple) to check if
+the data we pulled down makes sense.
+
+```{r}
+ticker_values %>%
+  filter(ticker == "AAPL") %>%
+  autoplot(price.close)
+```
+
+## Persisting The Data
+
+When we're happy with the data we can save it for later processing.
+
+```{r}
+ticker_values %>% write_csv("data/ticker_values.csv")
+```
