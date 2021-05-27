@@ -1,0 +1,218 @@
+Symbol,Name,Exchange,Round.Lot.Size,Market.Category,Financial.Status,Sector,Subsector
+AAPL,Apple Inc. - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Information Technology,Computer Hardware
+ADP,"Automatic Data Processing, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Information Technology,Internet Software & Services
+ADSK,"Autodesk, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Information Technology,Application Software
+AEP,"American Electric Power Company, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Utilities,Electric Utilities
+AMAT,"Applied Materials, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Information Technology,Semiconductor Equipment
+AMD,"Advanced Micro Devices, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),NA,NA
+AMGN,Amgen Inc. - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Health Care,Biotechnology
+BBI,"Brickell Biotech, Inc. - Common Stock",NASDAQ,100,NASDAQ Capital Market,Normal (Default),NA,NA
+CAR,"Avis Budget Group, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),NA,NA
+CMCSA,Comcast Corporation - Class A Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Consumer Discretionary,Broadcasting & Cable TV
+COST,Costco Wholesale Corporation - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Consumer Staples,Hypermarkets & Super Centers
+CSCO,"Cisco Systems, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Information Technology,Networking Equipment
+CSX,CSX Corporation - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Industrials,Railroads
+EXC,Exelon Corporation - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Utilities,MultiUtilities
+GT,The Goodyear Tire & Rubber Company - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Consumer Discretionary,Tires & Rubber
+HAS,"Hasbro, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Consumer Discretionary,Leisure Products
+HON,Honeywell International Inc. - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Industrials,Industrial Conglomerates
+INTC,Intel Corporation - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Information Technology,Semiconductors
+MAT,"Mattel, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Consumer Discretionary,Leisure Products
+MSFT,Microsoft Corporation - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Information Technology,Systems Software
+MU,"Micron Technology, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Information Technology,Semiconductors
+NWL,Newell Brands Inc. - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Consumer Discretionary,Housewares & Specialties
+PCAR,PACCAR Inc. - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Industrials,Construction & Farm Machinery & Heavy Trucks
+PCH,PotlatchDeltic Corporation - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),NA,NA
+PEP,"PepsiCo, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Consumer Staples,Soft Drinks
+TXN,Texas Instruments Incorporated - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Information Technology,Semiconductors
+WBA,"Walgreens Boots Alliance, Inc. - Common Stock",NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Consumer Staples,Drug Retail
+WEN,Wendy's Company (The) - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),NA,NA
+XEL,Xcel Energy Inc. - Common Stock,NASDAQ,100,NASDAQ Global Select MarketSM,Normal (Default),Utilities,MultiUtilities
+ABT,Abbott Laboratories Common Stock,NYSE,100,NA,NA,Health Care,Health Care Equipment & Services
+ADM,Archer-Daniels-Midland Company Common Stock,NYSE,100,NA,NA,Consumer Staples,Agricultural Products
+AEE,Ameren Corporation Common Stock,NYSE,100,NA,NA,Utilities,MultiUtilities
+AIG,"American International Group, Inc. New Common Stock",NYSE,100,NA,NA,Financials,Property & Casualty Insurance
+AIT,"Applied Industrial Technologies, Inc. Common Stock",NYSE,100,NA,NA,NA,NA
+ALL,Allstate Corporation (The) Common Stock,NYSE,100,NA,NA,Financials,Property & Casualty Insurance
+AN,"AutoNation, Inc. Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Specialty Stores
+APD,"Air Products and Chemicals, Inc. Common Stock",NYSE,100,NA,NA,Materials,Industrial Gases
+ASH,Ashland Global Holdings Inc. Common Stock,NYSE,100,NA,NA,NA,NA
+AVY,Avery Dennison Corporation Common Stock,NYSE,100,NA,NA,Materials,Paper Packaging
+AXP,American Express Company Common Stock,NYSE,100,NA,NA,Financials,Consumer Finance
+BA,Boeing Company (The) Common Stock,NYSE,100,NA,NA,Industrials,Aerospace & Defense
+BAC,Bank of America Corporation Common Stock,NYSE,100,NA,NA,Financials,Banks
+BAX,Baxter International Inc. Common Stock,NYSE,100,NA,NA,Health Care,Health Care Equipment & Services
+BC,Brunswick Corporation Common Stock,NYSE,100,NA,NA,NA,NA
+BCO,Brinks Company (The) Common Stock,NYSE,100,NA,NA,NA,NA
+BDX,"Becton, Dickinson and Company Common Stock",NYSE,100,NA,NA,Health Care,Health Care Equipment & Services
+BK,The Bank of New York Mellon Corporation Common Stock,NYSE,100,NA,NA,Financials,Banks
+BLL,Ball Corporation Common Stock,NYSE,100,NA,NA,Materials,Metal & Glass Containers
+BMY,Bristol-Myers Squibb Company Common Stock,NYSE,100,NA,NA,Health Care,Health Care Distributors & Services
+BSX,Boston Scientific Corporation Common Stock,NYSE,100,NA,NA,Health Care,Health Care Equipment & Services
+C,"Citigroup, Inc. Common Stock",NYSE,100,NA,NA,Financials,Banks
+CAG,"ConAgra Brands, Inc. Common Stock",NYSE,100,NA,NA,Consumer Staples,Packaged Foods & Meats
+CAL,"Caleres, Inc. Common Stock",NYSE,100,NA,NA,NA,NA
+CAT,"Caterpillar, Inc. Common Stock",NYSE,100,NA,NA,Industrials,Construction & Farm Machinery & Heavy Trucks
+CB,Chubb Limited  Common Stock,NYSE,100,NA,NA,Financials,Property & Casualty Insurance
+CBB,Cincinnati Bell Inc. Common Stock,NYSE,100,NA,NA,NA,NA
+CCI,Crown Castle International Corp. (REIT) Common Stock,NYSE,100,NA,NA,Financials,REITs
+CCK,"Crown Holdings, Inc.",NYSE,100,NA,NA,NA,NA
+CI,Cigna Corporation Common Stock,NYSE,100,NA,NA,Health Care,Managed Health Care
+CL,Colgate-Palmolive Company Common Stock,NYSE,100,NA,NA,Consumer Staples,Household Products
+CLX,Clorox Company (The) Common Stock,NYSE,100,NA,NA,Consumer Staples,Household Products
+CMA,Comerica Incorporated Common Stock,NYSE,100,NA,NA,Financials,Banks
+CMI,Cummins Inc. Common Stock,NYSE,100,NA,NA,Industrials,Industrial Machinery
+CNP,"CenterPoint Energy, Inc (Holding Co) Common Stock",NYSE,100,NA,NA,Utilities,MultiUtilities
+COP,ConocoPhillips Common Stock,NYSE,100,NA,NA,Energy,Oil & Gas Exploration & Production
+CPB,Campbell Soup Company Common Stock,NYSE,100,NA,NA,Consumer Staples,Packaged Foods & Meats
+CR,Crane Co. Common Stock,NYSE,100,NA,NA,NA,NA
+CSR,D/B/A Centerspace Common Stock,NYSE,100,NA,NA,NA,NA
+CTB,Cooper Tire & Rubber Company Common Stock,NYSE,100,NA,NA,NA,NA
+CVS,CVS Health Corporation Common Stock,NYSE,100,NA,NA,Consumer Staples,Drug Retail
+CVX,Chevron Corporation Common Stock,NYSE,100,NA,NA,Energy,Integrated Oil & Gas
+D,"Dominion Energy, Inc. Common Stock",NYSE,100,NA,NA,Utilities,Electric Utilities
+DD,"DuPont de Nemours, Inc. Common Stock",NYSE,100,NA,NA,Materials,Diversified Chemicals
+DDS,"Dillard's, Inc. Common Stock",NYSE,100,NA,NA,NA,NA
+DE,Deere & Company Common Stock,NYSE,100,NA,NA,Industrials,Construction & Farm Machinery & Heavy Trucks
+DIS,Walt Disney Company (The) Common Stock,NYSE,100,NA,NA,Consumer Discretionary,Broadcasting & Cable TV
+DLX,Deluxe Corporation Common Stock,NYSE,100,NA,NA,NA,NA
+DOV,Dover Corporation Common Stock,NYSE,100,NA,NA,Industrials,Industrial Machinery
+DRI,"Darden Restaurants, Inc. Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Restaurants
+DTE,DTE Energy Company Common Stock,NYSE,100,NA,NA,Utilities,MultiUtilities
+DUK,Duke Energy Corporation (Holding Company) Common Stock,NYSE,100,NA,NA,Utilities,Electric Utilities
+DXC,DXC Technology Company Common Stock ,NYSE,100,NA,NA,NA,NA
+ECL,Ecolab Inc. Common Stock,NYSE,100,NA,NA,Materials,Specialty Chemicals
+ED,"Consolidated Edison, Inc. Common Stock",NYSE,100,NA,NA,Utilities,Electric Utilities
+EIX,Edison International Common Stock,NYSE,100,NA,NA,Utilities,Electric Utilities
+EMN,Eastman Chemical Company Common Stock,NYSE,100,NA,NA,Materials,Diversified Chemicals
+EMR,Emerson Electric Company Common Stock,NYSE,100,NA,NA,Industrials,Industrial Conglomerates
+ETN,"Eaton Corporation, PLC Ordinary Shares",NYSE,100,NA,NA,Industrials,Industrial Conglomerates
+ETR,Entergy Corporation Common Stock,NYSE,100,NA,NA,Utilities,Electric Utilities
+F,Ford Motor Company Common Stock,NYSE,100,NA,NA,Consumer Discretionary,Automobile Manufacturers
+FCN,"FTI Consulting, Inc. Common Stock",NYSE,100,NA,NA,NA,NA
+FCX,"Freeport-McMoRan, Inc. Common Stock",NYSE,100,NA,NA,Materials,Diversified Metals & Mining
+FDX,FedEx Corporation Common Stock,NYSE,100,NA,NA,Industrials,Air Freight & Logistics
+FE,FirstEnergy Corp. Common Stock,NYSE,100,NA,NA,Utilities,Electric Utilities
+FL,"Foot Locker, Inc.",NYSE,100,NA,NA,NA,NA
+FMC,FMC Corporation Common Stock,NYSE,100,NA,NA,Materials,Diversified Chemicals
+GD,General Dynamics Corporation Common Stock,NYSE,100,NA,NA,Industrials,Aerospace & Defense
+GE,General Electric Company Common Stock,NYSE,100,NA,NA,Industrials,Industrial Conglomerates
+GIS,"General Mills, Inc. Common Stock",NYSE,100,NA,NA,Consumer Staples,Packaged Foods & Meats
+GLW,Corning Incorporated Common Stock,NYSE,100,NA,NA,Industrials,Construction & Engineering
+GPC,Genuine Parts Company Common Stock,NYSE,100,NA,NA,Consumer Discretionary,Specialty Stores
+GPS,"Gap, Inc. (The) Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Apparel Retail
+GRA,W.R. Grace & Co. Common Stock,NYSE,100,NA,NA,NA,NA
+GWW,"W.W. Grainger, Inc. Common Stock",NYSE,100,NA,NA,Industrials,Industrial Materials
+HAL,Halliburton Company Common Stock,NYSE,100,NA,NA,Energy,Oil & Gas Equipment & Services
+HD,"Home Depot, Inc. (The) Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Home Improvement Retail
+HES,Hess Corporation Common Stock,NYSE,100,NA,NA,Energy,Integrated Oil & Gas
+HIG,"Hartford Financial Services Group, Inc. (The) Common Stock",NYSE,100,NA,NA,Financials,Property & Casualty Insurance
+HP,"Helmerich & Payne, Inc. Common Stock",NYSE,100,NA,NA,Energy,Oil & Gas Drilling
+HPQ,HP Inc. Common Stock,NYSE,100,NA,NA,Information Technology,Computer Hardware
+HRB,"H&R Block, Inc. Common Stock",NYSE,100,NA,NA,Financials,Consumer Finance
+HSY,The Hershey Company Common Stock,NYSE,100,NA,NA,Consumer Staples,Packaged Foods & Meats
+HUM,Humana Inc. Common Stock,NYSE,100,NA,NA,Health Care,Managed Health Care
+IBM,International Business Machines Corporation Common Stock,NYSE,100,NA,NA,Information Technology,IT Consulting & Services
+IFF,"Internationa Flavors & Fragrances, Inc. Common Stock",NYSE,100,NA,NA,Materials,Specialty Chemicals
+INGR,Ingredion Incorporated Common Stock,NYSE,100,NA,NA,NA,NA
+IP,International Paper Company Common Stock,NYSE,100,NA,NA,Materials,Paper Products
+IPG,"Interpublic Group of Companies, Inc. (The) Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Advertising
+ITT,ITT Inc. Common Stock ,NYSE,100,NA,NA,NA,NA
+ITW,Illinois Tool Works Inc. Common Stock,NYSE,100,NA,NA,Industrials,Industrial Machinery
+JCI,Johnson Controls International plc Ordinary Share,NYSE,100,NA,NA,Consumer Discretionary,Auto Parts & Equipment
+JNJ,Johnson & Johnson Common Stock,NYSE,100,NA,NA,Health Care,Health Care Equipment & Services
+JPM,JP Morgan Chase & Co. Common Stock,NYSE,100,NA,NA,Financials,Banks
+JWN,"Nordstrom, Inc. Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Department Stores
+K,Kellogg Company Common Stock,NYSE,100,NA,NA,Consumer Staples,Packaged Foods & Meats
+KBH,KB Home Common Stock,NYSE,100,NA,NA,NA,NA
+KEY,KeyCorp Common Stock,NYSE,100,NA,NA,Financials,Banks
+KMB,Kimberly-Clark Corporation Common Stock,NYSE,100,NA,NA,Consumer Staples,Household Products
+KO,Coca-Cola Company (The) Common Stock,NYSE,100,NA,NA,Consumer Staples,Soft Drinks
+KR,Kroger Company (The) Common Stock,NYSE,100,NA,NA,Consumer Staples,Food Retail
+L,Loews Corporation Common Stock,NYSE,100,NA,NA,Financials,Multi-Sector Holdings
+LB,"L Brands, Inc.",NYSE,100,NA,NA,Consumer Discretionary,Apparel Retail
+LLY,Eli Lilly and Company Common Stock,NYSE,100,NA,NA,Health Care,Pharmaceuticals
+LMT,Lockheed Martin Corporation Common Stock,NYSE,100,NA,NA,Industrials,Aerospace & Defense
+LNC,Lincoln National Corporation Common Stock,NYSE,100,NA,NA,Financials,Multi-line Insurance
+LOW,"Lowe's Companies, Inc. Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Home Improvement Retail
+LPX,Louisiana-Pacific Corporation Common Stock,NYSE,100,NA,NA,NA,NA
+LSI,"Life Storage, Inc. Common Stock",NYSE,100,NA,NA,NA,NA
+LUB,"Luby's, Inc. Common Stock",NYSE,100,NA,NA,NA,NA
+LUV,Southwest Airlines Company Common Stock,NYSE,100,NA,NA,Industrials,Airlines
+M,Macy's Inc Common Stock,NYSE,100,NA,NA,Consumer Discretionary,Department Stores
+MAS,Masco Corporation Common Stock,NYSE,100,NA,NA,Industrials,Building Products
+MCD,McDonald's Corporation Common Stock,NYSE,100,NA,NA,Consumer Discretionary,Restaurants
+MCO,Moody's Corporation Common Stock,NYSE,100,NA,NA,Financials,Diversified Financial Services
+MD,"Mednax, Inc. Common Stock",NYSE,100,NA,NA,NA,NA
+MDP,Meredith Corporation Common Stock,NYSE,100,NA,NA,NA,NA
+MDT,Medtronic plc. Ordinary Shares,NYSE,100,NA,NA,Health Care,Health Care Equipment & Services
+MMC,"Marsh & McLennan Companies, Inc. Common Stock",NYSE,100,NA,NA,Financials,Insurance Brokers
+MMM,3M Company Common Stock,NYSE,100,NA,NA,Industrials,Industrial Conglomerates
+MNR,Monmouth Real Estate Investment Corporation Class A Common Stock,NYSE,100,NA,NA,NA,NA
+MO,"Altria Group, Inc.",NYSE,100,NA,NA,Consumer Staples,Tobacco
+MRK,"Merck & Company, Inc. Common Stock (new)",NYSE,100,NA,NA,Health Care,Pharmaceuticals
+MRK,"Merck & Company, Inc. Common Stock Ex-Distribution When Issued",NYSE,100,NA,NA,Health Care,Pharmaceuticals
+MRO,Marathon Oil Corporation Common Stock,NYSE,100,NA,NA,Energy,Oil & Gas Exploration & Production
+MS,Morgan Stanley Common Stock,NYSE,100,NA,NA,Financials,Investment Banking & Brokerage
+MSI,"Motorola Solutions, Inc. Common Stock",NYSE,100,NA,NA,Information Technology,Telecommunications Equipment
+NAV,Navistar International Corporation Common Stock,NYSE,100,NA,NA,NA,NA
+NC,"NACCO Industries, Inc. Common Stock",NYSE,100,NA,NA,NA,NA
+NEE,"NextEra Energy, Inc. Common Stock",NYSE,100,NA,NA,Utilities,MultiUtilities
+NEM,Newmont Corporation,NYSE,100,NA,NA,Materials,Gold
+NKE,"Nike, Inc. Common Stock",NYSE,100,NA,NA,Consumer Discretionary,"Apparel, Accessories & Luxury Goods"
+NOC,Northrop Grumman Corporation Common Stock,NYSE,100,NA,NA,Industrials,Aerospace & Defense
+NSC,Norfolk Southern Corporation Common Stock,NYSE,100,NA,NA,Industrials,Railroads
+NUE,Nucor Corporation Common Stock,NYSE,100,NA,NA,Materials,Steel
+NYT,New York Times Company (The) Common Stock,NYSE,100,NA,NA,NA,NA
+OKE,"ONEOK, Inc. Common Stock",NYSE,100,NA,NA,Energy,Oil & Gas Exploration & Production
+ORCL,Oracle Corporation Common Stock,NYSE,100,NA,NA,Information Technology,Application Software
+OXY,Occidental Petroleum Corporation Common Stock,NYSE,100,NA,NA,Energy,Oil & Gas Exploration & Production
+PBI,Pitney Bowes Inc. Common Stock,NYSE,100,NA,NA,Industrials,Office Services & Supplies
+PCG,Pacific Gas & Electric Co. Common Stock,NYSE,100,NA,NA,Utilities,MultiUtilities
+PEG,Public Service Enterprise Group Incorporated Common Stock,NYSE,100,NA,NA,Utilities,Electric Utilities
+PFE,"Pfizer, Inc. Common Stock",NYSE,100,NA,NA,Health Care,Pharmaceuticals
+PG,Procter & Gamble Company (The) Common Stock,NYSE,100,NA,NA,Consumer Staples,Personal Products
+PH,Parker-Hannifin Corporation Common Stock,NYSE,100,NA,NA,Industrials,Industrial Conglomerates
+PHM,"PulteGroup, Inc. Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Homebuilding
+PKI,"PerkinElmer, Inc. Common Stock",NYSE,100,NA,NA,Health Care,Health Care Equipment & Services
+PNC,"PNC Financial Services Group, Inc. (The) Common Stock",NYSE,100,NA,NA,Financials,Banks
+PPG,"PPG Industries, Inc. Common Stock",NYSE,100,NA,NA,Materials,Diversified Chemicals
+PPL,PPL Corporation Common Stock,NYSE,100,NA,NA,Utilities,Electric Utilities
+R,"Ryder System, Inc. Common Stock",NYSE,100,NA,NA,Industrials,Industrial Conglomerates
+RAD,Rite Aid Corporation Common Stock,NYSE,100,NA,NA,NA,NA
+ROK,"Rockwell Automation, Inc. Common Stock",NYSE,100,NA,NA,Industrials,Industrial Conglomerates
+RRD,R.R. Donnelley & Sons Company Common Stock,NYSE,100,NA,NA,NA,NA
+SCI,Service Corporation International Common Stock,NYSE,100,NA,NA,NA,NA
+SHW,Sherwin-Williams Company (The) Common Stock,NYSE,100,NA,NA,Materials,Specialty Chemicals
+SLB,Schlumberger N.V. Common Stock,NYSE,100,NA,NA,Energy,Oil & Gas Equipment & Services
+SNA,Snap-On Incorporated Common Stock,NYSE,100,NA,NA,Consumer Discretionary,Household Appliances
+SO,Southern Company (The) Common Stock,NYSE,100,NA,NA,Utilities,Electric Utilities
+SPGI,S&P Global Inc. Common Stock,NYSE,100,NA,NA,NA,NA
+SWK,"Stanley Black & Decker, Inc. Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Household Appliances
+SYY,Sysco Corporation Common Stock,NYSE,100,NA,NA,Consumer Staples,Food Distributors
+T,AT&T Inc.,NYSE,100,NA,NA,Telecommunications Services,Integrated Telecommunications Services
+TAP,Molson Coors Beverage Company Class B Common Stock,NYSE,100,NA,NA,Consumer Staples,Brewers
+TEN,Tenneco Inc. Class A Voting Common Stock,NYSE,100,NA,NA,NA,NA
+TGNA,TEGNA Inc,NYSE,100,NA,NA,Consumer Discretionary,Publishing
+TGT,Target Corporation Common Stock,NYSE,100,NA,NA,Consumer Discretionary,General Merchandise Stores
+THC,Tenet Healthcare Corporation Common Stock,NYSE,100,NA,NA,Health Care,Health Care Facilities
+TJX,"TJX Companies, Inc. (The) Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Apparel Retail
+TKR,Timken Company (The) Common Stock,NYSE,100,NA,NA,NA,NA
+TRV,"The Travelers Companies, Inc. Common Stock",NYSE,100,NA,NA,Financials,Property & Casualty Insurance
+TXT,Textron Inc. Common Stock,NYSE,100,NA,NA,Industrials,Industrial Conglomerates
+UIS,Unisys Corporation New Common Stock,NYSE,100,NA,NA,NA,NA
+UNH,UnitedHealth Group Incorporated Common Stock (DE),NYSE,100,NA,NA,Health Care,Managed Health Care
+UNM,Unum Group Common Stock,NYSE,100,NA,NA,Financials,Diversified Financial Services
+UNP,Union Pacific Corporation Common Stock,NYSE,100,NA,NA,Industrials,Railroads
+USB,U.S. Bancorp Common Stock,NYSE,100,NA,NA,Financials,Banks
+VFC,V.F. Corporation Common Stock,NYSE,100,NA,NA,Consumer Discretionary,"Apparel, Accessories & Luxury Goods"
+VZ,Verizon Communications Inc. Common Stock,NYSE,100,NA,NA,Telecommunications Services,Integrated Telecommunications Services
+WFC,Wells Fargo & Company Common Stock,NYSE,100,NA,NA,Financials,Banks
+WHR,Whirlpool Corporation Common Stock,NYSE,100,NA,NA,Consumer Discretionary,Household Appliances
+WMB,"Williams Companies, Inc. (The) Common Stock",NYSE,100,NA,NA,Energy,Oil & Gas Exploration & Production
+WMT,Walmart Inc. Common Stock,NYSE,100,NA,NA,Consumer Staples,Hypermarkets & Super Centers
+WOR,"Worthington Industries, Inc. Common Stock",NYSE,100,NA,NA,NA,NA
+WY,Weyerhaeuser Company Common Stock,NYSE,100,NA,NA,Financials,REITs
+X,United States Steel Corporation Common Stock,NYSE,100,NA,NA,NA,NA
+XOM,Exxon Mobil Corporation Common Stock,NYSE,100,NA,NA,Energy,Integrated Oil & Gas
+XRX,Xerox Holdings Corporation Common Stock,NYSE,100,NA,NA,Information Technology,IT Consulting & Services

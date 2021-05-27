@@ -18,6 +18,9 @@ companies, that have been listed in the S&P 500 and exist to this day.
 library(tidyverse)
 library(tsibble)
 library(feasts)
+library(janitor)
+library(qrmdata)
+data("SP500_const")
 ```
 
 We take all ticker symbols that have been in the S&P 500 since 1996. We use the
@@ -91,6 +94,30 @@ ticker_values <- lookup_output$df.tickers %>%
 ticker_values
 ```
 
+```{r}
+good_to_go_meta <- current_common_exchange_symbols %>%
+  filter(Symbol %in% good_to_go_symbols)
+
+good_to_go_meta
+```
+
+```{r}
+additional_meta <- SP500_const_info %>%
+  filter(Ticker %in% good_to_go_symbols) %>%
+  rename(Symbol = Ticker)
+
+additional_meta
+```
+
+```{r}
+complete_meta <- good_to_go_meta %>%
+  remove_empty(which = c("cols")) %>%
+  select(-c(ACT.Symbol, CQS.Symbol, NASDAQ.Symbol, Test.Issue, ETF)) %>%
+  left_join(additional_meta, by = "Symbol")
+
+complete_meta
+```
+
 ## Quick Sanity Check
 
 At this point we have complete daily time series for 216 ticker symbols.
@@ -109,4 +136,5 @@ When we're happy with the data we can save it for later processing.
 
 ```{r}
 ticker_values %>% write_csv("data/ticker_values.csv")
+complete_meta %>% write_csv("data/ticker_meta.csv")
 ```

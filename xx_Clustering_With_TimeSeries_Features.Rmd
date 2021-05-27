@@ -1,0 +1,311 @@
+---
+title: "Global Clustering Based On Time Series Features"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(tsibble)
+library(feasts)
+library(Rcatch22)
+library(janitor)
+```
+
+
+```{r}
+ticker_data <- read_csv("data/ticker_values.csv",
+                        col_types = cols(
+                          price.open = col_double(),
+                          price.high = col_double(),
+                          price.low = col_double(),
+                          price.close = col_double(),
+                          volume = col_double(),
+                          price.adjusted = col_double(),
+                          ref.date = col_date(format = ""),
+                          ticker = col_character(),
+                          ret.adjusted.prices = col_double(),
+                          ret.closing.prices = col_double()
+                        )) %>%
+  as_tsibble(key = ticker, index = ref.date)
+
+ticker_data
+```
+
+```{r}
+ticker_meta <- read_csv(
+  "data/ticker_meta.csv",
+  col_types = cols(
+    .default = col_character(),
+    Round.Lot.Size = col_double()
+))
+
+ticker_meta
+```
+
+
+```{r}
+prices <- ticker_data %>%
+  select(price.adjusted, ticker) %>%
+  fill_gaps() %>%
+  fill(price.adjusted, .direction = "down") %>%
+  group_by(ticker) %>%
+  mutate(standardized_price = (price.adjusted - mean(price.adjusted)) / sd(price.adjusted)) %>%
+  ungroup() %>%
+  select(-price.adjusted)
+
+prices
+```
+
+
+```{r}
+prices %>%
+  ggplot(aes(x = ref.date, standardized_price, group = ticker)) +
+  geom_line()
+```
+
+```{r}
+c22_price_feats <- prices %>%
+  features(standardized_price, list(~ catch22_all(.) %>% pivot_wider(names_from = names, values_from = values)))
+```
+
+```{r}
+c22_price_feats
+```
+
+```{r}
+library(tidymodels)
+library(cluster)
+library(factoextra)
+library(dendextend)
+```
+
+```{r}
+prep_rec <- recipe(~ ., data = c22_price_feats) %>%
+  step_normalize(all_numeric())
+
+prepped_data <- prep_rec %>%
+  prep() %>%
+  juice() %>%
+  column_to_rownames("ticker") %>%
+  remove_empty(which = "cols") %>%
+  as.data.frame()
+
+prepped_data
+```
+
+```{r}
+skimr::skim(prepped_data)
+```
+
+
+```{r}
+set.seed(1337)
+
+centers <- c()
+withinsss <- c()
+
+for (center in 1:15) {
+  kclust <- kmeans(prepped_data, centers = center, nstart = 10)
+  twss <- kclust %>% glance() %>% (function (x) x$tot.withinss)
+  
+  centers[center] <- center
+  withinsss[center] <- twss
+}
+
+kclust_res <- tibble(Centers = centers, TotalWithinss = withinsss)
+kclust_res
+```
+
+```{r}
+ggplot(kclust_res, aes(x = Centers, y = TotalWithinss)) +
+  geom_point() +
+  geom_line()
+```
+```{r}
+opt_clust <- kmeans(prepped_data, centers = 2, nstart = 10)
+
+cluster_sizes <- opt_clust %>% tidy() %>% (function (x) x$size) # your cluster sizes
+cluster_sizes
+```
+
+```{r, fig.width=10}
+clustered_data <- augment(opt_clust, prepped_data) %>%
+  rename(ticker = .rownames)
+
+clustered_tickers <- prices %>%
+  left_join(clustered_data %>% select(ticker, .cluster), by = "ticker")
+
+clustered_tickers %>%
+  ggplot(aes(x = ref.date, standardized_price, group = ticker, color = .cluster)) +
+  geom_line() +
+  facet_wrap(~ .cluster, nrow = 2)
+```
+
+```{r, fig.width=10}
+clustered_data %>%
+  left_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
+  replace_na(list(Sector = "Not Specified", Subsector = "Not Specified")) %>%
+  group_by(.cluster, Sector) %>%
+  summarise(count = n()) %>%
+  mutate(freq = count / sum(count)) %>%
+  ggplot(aes(x = Sector, y = freq, color = Sector, fill = Sector)) +
+  geom_col() +
+  facet_wrap(~ .cluster, nrow = 2) +
+  coord_flip()
+```
+
+```{r}
+set.seed(1337)
+
+pca_rec <- recipe(~., data = prepped_data) %>%
+  step_pca(all_numeric(), num_comp = NCOL(prepped_data))
+
+pca_estimates <- pca_rec %>% prep()
+
+components <- pca_estimates %>%
+  juice()
+
+pca_clust <- kmeans(components, nstart = 10, centers = 2)
+
+clustered_components <- augment(pca_clust, components)
+
+ggplot(clustered_components, aes(x = PC01, y = PC02, color = .cluster)) +
+  geom_point(size = 2.5)
+```
+
+```{r}
+stdev <- pca_estimates$steps[[1]]$res$sdev
+percent_variation <- stdev ^ 2 / sum(stdev ^ 2)
+
+variations <- tibble(PC = paste0("PC", 1:length(stdev)),
+                     VarExplained = percent_variation)
+variations
+```
+
+```{r}
+explained <- 0
+n_comps_for_095 <- 0
+for (row in 1:NROW(variations)) {
+  explained <- explained + variations$VarExplained[row]
+  n_comps_for_095 <- n_comps_for_095 + 1
+  if (explained >= 0.95) {
+    break;
+  }
+}
+
+c(explained, n_comps_for_095)
+```
+
+```{r}
+variations %>%
+  mutate(PC = forcats::fct_inorder(PC)) %>%
+  # just take the first 20 because the rest doesn't matter too much anyway
+  # and the plot gets very hard to read otherwise
+  slice_head(n = n_comps_for_095) %>%
+  ggplot(aes(x = PC, y = VarExplained)) +
+  geom_col()
+```
+
+```{r}
+library(dbscan)
+set.seed(1337)
+
+hdb <- dbscan::hdbscan(prepped_data, minPts = 4)
+hdb
+```
+
+```{r}
+plot(hdb, show_flat = TRUE)
+```
+
+```{r}
+clustered_data <- bind_cols(prepped_data, list(.cluster = hdb$cluster)) %>%
+  rownames_to_column("ticker")
+
+clustered_tickers <- prices %>%
+  left_join(clustered_data %>% select(ticker, .cluster), by = "ticker")
+
+clustered_tickers %>%
+  ggplot(aes(x = ref.date, standardized_price, group = ticker, color = .cluster)) +
+  geom_line() +
+  facet_wrap(~ .cluster, nrow = 3)
+```
+
+```{r, fig.width=10}
+clustered_data %>%
+  left_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
+  replace_na(list(Sector = "Not Specified", Subsector = "Not Specified")) %>%
+  group_by(.cluster, Sector) %>%
+  summarise(count = n()) %>%
+  mutate(freq = count / sum(count)) %>%
+  ggplot(aes(x = Sector, y = freq, color = Sector, fill = Sector)) +
+  geom_col() +
+  facet_wrap(~ .cluster, nrow = 3) +
+  coord_flip()
+```
+
+```{r}
+clustered_data %>%
+  select(ticker, .cluster) %>%
+  left_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
+  filter(.cluster == 1)
+```
+
+```{r}
+clust_one_symbols <- clustered_data %>%
+  filter(.cluster == 2) %>%
+  select(ticker) %>%
+  (function(x) x$ticker)
+
+clust_one_symbols
+```
+
+```{r}
+library(tidyquant)
+
+Ra <- ticker_data %>%
+  filter(ticker %in% clust_one_symbols) %>%
+  rename(date = ref.date) %>%
+  tibble() %>%
+  group_by(ticker) %>%
+  tq_transmute(select = price.adjusted,
+               mutate_fun = periodReturn,
+               period = "monthly",
+               col_rename = "Ra")
+
+Ra
+```
+
+```{r}
+Rb <- c("^GSPC") %>%
+  tq_get(get = "stock.prices",
+         from = "1999-01-04",
+         to = "2021-05-07") %>%
+  tq_transmute(select = adjusted,
+               mutate_fun = periodReturn,
+               period = "monthly",
+               col_rename = "Rb")
+
+Rb
+```
+
+```{r}
+RaRb <- left_join(Ra, Rb, by = "date")
+RaRb
+```
+
+```{r}
+RaRb_capm <- RaRb %>%
+  tq_performance(Ra = Ra,
+                 Rb = Rb,
+                 performance_fun = table.CAPM)
+
+RaRb_capm
+```
+
+```{r}
+RaRb_capm %>%
+  mutate(tikcer = as_factor(ticker)) %>%
+  ggplot(aes(x = ActivePremium)) +
+  geom_histogram(binwidth = 0.02)
+```
