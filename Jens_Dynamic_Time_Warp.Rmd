@@ -1,0 +1,60 @@
+---
+title: "Dynamic Time Warp"
+output: html_document
+---
+
+```{r}
+
+install.packages("dtwclust")
+library(dtwclust)
+
+
+# Load data
+data("ticker_meta")
+data("ticker_values")
+
+
+#partional
+
+pc <- tsclust(CharTraj, type = "partitional", k = 20L, 
+              distance = "dtw_basic", centroid = "pam", 
+              seed = 3247L, trace = TRUE,
+              args = tsclust_args(dist = list(window.size = 20L)))
+
+
+#hierarchical
+hc <- tsclust(CharTraj, type = "hierarchical", k = 20L, 
+              distance = "sbd", trace = TRUE,
+              control = hierarchical_control(method = "average"))
+
+
+
+#fuzzy
+# Calculate autocorrelation up to 50th lag, considering a list of time series as input
+acf_fun <- function(series, ...) {
+    lapply(series, function(x) { as.numeric(acf(x, lag.max = 50L, plot = FALSE)$acf) })
+}
+# Autocorrelation-based fuzzy c-means
+fc <- tsclust(CharTraj[1L:25L], type = "fuzzy", k = 5L,
+              preproc = acf_fun, distance = "L2",
+              seed = 123L)
+fc
+
+
+plot(hc)
+
+
+
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
