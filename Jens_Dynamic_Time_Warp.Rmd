@@ -4,29 +4,80 @@ output: html_document
 ---
 
 ```{r}
-
-install.packages("dtwclust")
+library(tidyverse)
 library(dtwclust)
+library(tsibble)
+library(feasts)
+library(janitor)
+```
 
 
+```{r}
 # Load data
-data("ticker_meta")
-data("ticker_values")
+ticker_data <- read_csv("data/ticker_values.csv",
+                        col_types = cols(
+                          price.open = col_double(),
+                          price.high = col_double(),
+                          price.low = col_double(),
+                          price.close = col_double(),
+                          volume = col_double(),
+                          price.adjusted = col_double(),
+                          ref.date = col_date(format = ""),
+                          ticker = col_character(),
+                          ret.adjusted.prices = col_double(),
+                          ret.closing.prices = col_double()
+                        )) %>%
+  as_tsibble(key = ticker, index = ref.date)
+
+ticker_data
+```
+
+```{r}
+prices <- ticker_data %>%
+  select(price.adjusted, ticker) %>%
+  fill_gaps() %>%
+  fill(price.adjusted, .direction = "down") %>%
+  group_by(ticker) %>%
+  mutate(standardized_price = (price.adjusted - mean(price.adjusted)) / sd(price.adjusted)) %>%
+  ungroup() %>%
+  select(-price.adjusted)
+
+prices
+```
+
+```{r}
+prices_rowise <- prices %>%
+  tibble() %>%
+  pivot_wider(id_cols = c(ticker, ref.date), names_from = ref.date, values_from = standardized_price)
+
+prices_rowise_rn <- prices_rowise %>%
+  select(-ticker) %>%
+  as.data.frame()
+
+rownames(prices_rowise_rn) <- prices_rowise$ticker
+
+prices_rowise_rn %>% head()
+```
 
 
-#partional
 
-pc <- tsclust(CharTraj, type = "partitional", k = 20L, 
+```{r}
+pc <- tsclust(prices_rowise_rn %>% head(n = 50), type = "partitional", k = 3L, 
               distance = "dtw_basic", centroid = "pam", 
               seed = 3247L, trace = TRUE,
               args = tsclust_args(dist = list(window.size = 20L)))
+```
+
+```{r}
+plot(pc)
+```
 
 
+```{r}
 #hierarchical
 hc <- tsclust(CharTraj, type = "hierarchical", k = 20L, 
               distance = "sbd", trace = TRUE,
               control = hierarchical_control(method = "average"))
-
 
 
 #fuzzy
@@ -39,14 +90,6 @@ fc <- tsclust(CharTraj[1L:25L], type = "fuzzy", k = 5L,
               preproc = acf_fun, distance = "L2",
               seed = 123L)
 fc
-
-
-plot(hc)
-
-
-
-
-
 ```
 
 ## Including Plots
