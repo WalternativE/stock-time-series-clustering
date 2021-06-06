@@ -37,7 +37,8 @@ ticker_meta <- read_csv(
   col_types = cols(
     .default = col_character(),
     Round.Lot.Size = col_double()
-))
+)) %>%
+  filter(Name != "Merck & Company, Inc. Common Stock Ex-Distribution When Issued")
 
 ticker_meta
 ```
@@ -431,8 +432,6 @@ windowed_prices <- prices %>%
                .f = (function(x) ungroup(x) %>% as_tsibble(index = ref.date, key = ticker)),
                .before = 2,
                .complete = TRUE)
-
-windowed_prices
 ```
 
 ```{r}
@@ -492,4 +491,171 @@ get_tickers_for_cluster(test_window_clustered_data, 2) %>%
   ticker_performance_against_baseline_in_range(price_range_1999_2001) %>%
   ggplot(aes(x = ActivePremium)) +
   geom_histogram(binwidth = 0.01)
+```
+
+```{r}
+cluster_price_range <- function(.price_range) {
+  unclustered_ticker_graph <- .price_range %>%
+    ggplot(aes(x = ref.date, standardized_price, group = ticker)) +
+    geom_line()
+  
+  price_range_prepped_data <- .price_range %>%
+    features_for_price_range() %>%
+    prepare_price_range(.rec = prep_rec) %>%
+    extract_pca_components(pca_96_perc_rec)
+  
+  price_range_clustered_data <- price_range_prepped_data %>%
+    perform_clustering()
+
+  clustered_ticker_graph <- price_range_clustered_data %>%
+    join_cluster_with_price_range(.price_range = .price_range) %>%
+    plot_clustered_tickers()
+  
+  clustered_sector_composition <- price_range_clustered_data %>%
+    enrich_with_meta() %>%
+    sector_freq_per_cluster()
+  
+  list(price_range = .price_range,
+       unclustered_graph = unclustered_ticker_graph,
+       clustered_data = price_range_clustered_data,
+       clustered_graph = clustered_ticker_graph,
+       clustered_sectors = clustered_sector_composition)
+}
+
+clustered_price_windows <- prices %>%
+  tibble() %>%
+  group_by(ticker) %>%
+  arrange(ref.date) %>%
+  slide_period(prices_index,
+               "year",
+               .f = (function(x) ungroup(x) %>%
+                       as_tsibble(index = ref.date, key = ticker) %>%
+                       cluster_price_range()),
+               .before = 2,
+               .complete = TRUE)
+```
+
+```{r}
+clustered_price_windows[[4]]
+```
+
+```{r}
+clustered_price_windows[[11]]
+```
+
+```{r}
+clustered_price_windows[[13]]
+```
+
+```{r}
+clustered_price_windows[[22]]
+```
+
+```{r}
+label_for_price_range <- function(price_range) {
+  min_year <- format(price_range$ref.date %>% min(), "%Y")
+  max_year <- format(price_range$ref.date %>% max(), "%Y")
+  paste(min_year, "_", max_year, sep = "")
+}
+
+extract_cluster_info <- function(window_results) {
+  column_label <- label_for_price_range(window_results$price_range)
+  
+  window_results$clustered_data %>%
+    select(ticker, .cluster) %>%
+    rename_with(~ column_label, .cluster)  
+}
+
+extract_cluster_info(clustered_price_windows[[3]])
+```
+
+```{r}
+cluster_membership_over_time <- clustered_price_windows %>%
+  compact() %>%
+  lapply(extract_cluster_info) %>%
+  reduce(inner_join, by = "ticker")
+
+cluster_membership_over_time
+```
+
+```{r}
+cluster_membership_over_time %>%
+  pivot_longer(cols = c(everything(), -ticker), names_to = "window", values_to = "cluster") %>%
+  group_by(ticker) %>%
+  summarise(memberships = length(unique(cluster))) %>%
+  filter(memberships > 1)
+```
+
+```{r}
+tickers_by_all_time_cluster <- cluster_membership_over_time %>%
+  pivot_longer(cols = c(everything(), -ticker), names_to = "window", values_to = "cluster") %>%
+  group_by(ticker) %>%
+  summarise(all_time_cluster = cluster %>% first())
+
+tickers_by_all_time_cluster
+```
+
+```{r}
+get_cluster_performance <- function(window_result) {
+  price_period <- label_for_price_range(window_result$price_range)
+  
+  window_result$clustered_data$.cluster %>%
+    unique() %>%
+    lapply((function(x) get_tickers_for_cluster(window_result$clustered_data, x) %>%
+              ticker_performance_against_baseline_in_range(window_result$price_range) %>%
+              (function(y) tibble(median_active_premium = median(y$ActivePremium, na.rm = TRUE),
+                                  cluster = x,
+                                  period = price_period)))) %>%
+    reduce(bind_rows)
+}
+
+get_cluster_performance(clustered_price_windows[[3]])
+```
+```{r}
+cluster_performances_per_period <- clustered_price_windows %>%
+  compact() %>%
+  lapply(get_cluster_performance) %>%
+  reduce(bind_rows)
+
+cluster_performances_per_period
+```
+
+```{r}
+cluster_performances_per_period %>%
+  mutate(cluster = as_factor(cluster)) %>%
+  ggplot(aes(x = cluster, y = median_active_premium, fill = cluster)) +
+  geom_violin()
+```
+
+```{r}
+cluster_performances_per_period %>%
+  filter(cluster %in% c(0, 2)) %>%
+  (function(x) aov(cluster ~ median_active_premium, data = x)) %>%
+  summary()
+```
+
+
+```{r}
+cluster_of_interest <- prices %>%
+  tibble() %>%
+  left_join(tickers_by_all_time_cluster, by = "ticker") %>%
+  left_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
+  filter(all_time_cluster == 2) %>%
+  as_tsibble(index = ref.date, key = ticker) %>%
+  remove_empty(which = "cols")
+
+cluster_of_interest
+```
+
+```{r}
+cluster_of_interest %>%
+  ggplot(aes(x = ref.date, standardized_price, group = ticker)) +
+  geom_line()
+```
+
+```{r}
+tickers_by_all_time_cluster %>%
+  filter(all_time_cluster == 2) %>%
+  left_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
+  select(ticker, Name, Sector, Subsector)
 ```
