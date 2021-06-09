@@ -1,18 +1,32 @@
 ---
 title: "Global Clustering Based On Time Series Features"
-output: html_notebook
+output:
+  html_notebook:
+    toc: true
 ---
 
-```{r}
+Clustering is a common unsupervised learning approach. The problem with time series
+is that the notion of "distance" between time series isn't as straight forward as it
+is for independent multidimensional data points. Common distance metrics like
+euclidean or Manhattan distance don't necessarily tell you about how close two different
+time series are and in many cases the results of those computations would go against
+the human intuition. A way to still use clustering algorithms (and classification
+algorithms for that matter) on time series data sets is to compute time series
+features - metrics like the first local extreme points, points below the mean, etc -
+and use all of those features in place of the original (univariate) time series.
+
+In this document we try to apply this method on the stock data we collected in
+the data acquisition document. We will try to find meaningful clusters of tickers,
+look at their composition (which kind of companies can be found in these clusters)
+and at differences in their performance.
+
+```{r setup, include = FALSE}
 library(tidyverse)
 library(tsibble)
 library(feasts)
 library(Rcatch22)
 library(janitor)
-```
 
-
-```{r}
 ticker_data <- read_csv("data/ticker_values.csv",
                         col_types = cols(
                           price.open = col_double(),
@@ -28,10 +42,6 @@ ticker_data <- read_csv("data/ticker_values.csv",
                         )) %>%
   as_tsibble(key = ticker, index = ref.date)
 
-ticker_data
-```
-
-```{r}
 ticker_meta <- read_csv(
   "data/ticker_meta.csv",
   col_types = cols(
@@ -39,10 +49,13 @@ ticker_meta <- read_csv(
     Round.Lot.Size = col_double()
 )) %>%
   filter(Name != "Merck & Company, Inc. Common Stock Ex-Distribution When Issued")
-
-ticker_meta
 ```
 
+## Data Preparation
+
+The chosen tickers currently aren't on the same scale. We can remedy this by normalizing
+all values for each symbol. We'll focus on the adjusted price which is the closing
+price after corrections for splits and dividend distributions.
 
 ```{r}
 prices <- ticker_data %>%
@@ -57,12 +70,35 @@ prices <- ticker_data %>%
 prices
 ```
 
+Looking at all 216 symbols we can see similarities regarding big economic trends
+(bang/bust cycles and long time upward trend) as well as individual differences
+(a lot of steady values compared to more volatile stocks). We expect the chosen
+stocks to show some common characteristics as the selection criteria are rather
+stringent. Each title had to be part of the S&P 500 at one point in time during
+the last 30 years while also having data from 1999 to 2021. This favors established
+companies over new titles (left censoring) while also favoring extremely vetted
+stocks over the general population of traded titles (biased sample).
 
 ```{r}
 prices %>%
   ggplot(aes(x = ref.date, standardized_price, group = ticker)) +
   geom_line()
 ```
+
+## Time Series Feature Computation
+
+Working with raw time series values is both computationally expensive as well as
+generally hard to do right. To circumvent these problems researchers of all fields
+that use time series data have been doing extensive work to find features which
+represent time series as a vector of comparable features. One of those efforts
+culminated into the
+[Highly comparative time-series analysis package](https://github.com/benfulcher/hctsa)
+which allows to compute over 7000 features. Based on this work the researchers
+behind the [catch22 package](https://github.com/chlubba/catch22) selected 22
+features which - on average - offer the best cost/benefit trade-off in regarding
+general time series clustering and classification tasks. As we do not have
+in-depth knowledge of econometrics we decided to go with the `catch22` set of
+features rather than hand-picking the best set of features ourselves.
 
 ```{r}
 features_for_price_range <- function(price_range) {
@@ -75,9 +111,12 @@ c22_price_feats <- features_for_price_range(prices)
 c22_price_feats
 ```
 
-```{r}
+```{r, include = FALSE}
 library(tidymodels)
 ```
+
+Similar to "traditional" clustering and classification tasks we decided to normalize
+the features to bring them on the same scale.
 
 ```{r}
 prep_rec <- recipe(~ ., data = c22_price_feats) %>%
@@ -98,6 +137,12 @@ prepped_data <- c22_price_feats %>%
   prepare_price_range(.rec = prep_rec)
 ```
 
+## K-Means Clustering
+
+Without any indicators about the "right" amount of clusters and no prior knowledge
+in econometrics or trading we decided to try k-means clustering to see if there
+are obvious clusters within our data set.
+
 ```{r}
 set.seed(1337)
 
@@ -116,17 +161,32 @@ kclust_res <- tibble(Centers = centers, TotalWithinss = withinsss)
 kclust_res
 ```
 
+To get a rough estimate about the number of valid clusters we computed clusters
+with 1 to 15 centroids and compared the `withinss` measure. A visual analysis shows
+the anticipated elbow at $k=2$.
+
 ```{r}
 ggplot(kclust_res, aes(x = Centers, y = TotalWithinss)) +
   geom_point() +
   geom_line()
 ```
+
+Creating a cluster with two centroids shows a rather unbalanced distribution of
+170 versus 46 cluster members.
+
 ```{r}
 opt_clust <- kmeans(prepped_data, centers = 2, nstart = 10)
 
 cluster_sizes <- opt_clust %>% tidy() %>% (function (x) x$size) # your cluster sizes
 cluster_sizes
 ```
+
+As we don't see the temporal patterns in the feature-vector representation we join
+the cluster labels with our normalized price dataset and plot the time series
+in their respective clusters. We still see the the cycle and trend components in
+both clusters while also getting the sense of a possible sensible partition between
+stocks with certain high volatility behavior and stocks that show less movement
+in their price development.
 
 ```{r, fig.width=10}
 clustered_data <- augment(opt_clust, prepped_data) %>%
@@ -151,6 +211,13 @@ clustered_data %>%
   join_cluster_with_price_range(.price_range = prices) %>%
   plot_clustered_tickers()
 ```
+
+We were able to collect additional metadata containing information about the business
+sectors of certain titles within our data set. Looking at this data, we are
+particularly interested in the relative composition of our clusters. As we can
+see in the resulting figure there are striking differences but unfortunately
+the fraction of "unknown" sectors in the second cluster is far too high
+to base any interpretation on this result.
 
 ```{r, fig.width=10}
 enrich_with_meta <- function(clustered_prices) {
@@ -179,6 +246,11 @@ clustered_data %>%
   sector_freq_per_cluster()
 ```
 
+### Further Dimensionality Reduction
+
+In order to even further reduce the dimensions of our already rather slim
+feature vectors we decided to try a primary component anlysis.
+
 ```{r}
 pca_estimates <- recipe(~., data = prepped_data) %>%
   step_pca(all_numeric(), num_comp = NCOL(prepped_data)) %>%
@@ -197,16 +269,17 @@ components <- extract_pca_components(prepped_data, pca_estimates)
 components
 ```
 
+Looking at the percentages of variation each component explains we can see that
+the amount of explained variation rapidly decreases. This indicates, that we can
+most likely only work on a subset of components without loosing a lot of information.
+
 ```{r}
 stdev <- pca_estimates$steps[[1]]$res$sdev
 percent_variation <- stdev ^ 2 / sum(stdev ^ 2)
 
 variations <- tibble(PC = paste0("PC", 1:length(stdev)),
                      VarExplained = percent_variation)
-variations
-```
 
-```{r}
 explained <- 0
 n_comps_for_095 <- 0
 for (row in 1:NROW(variations)) {
@@ -217,10 +290,6 @@ for (row in 1:NROW(variations)) {
   }
 }
 
-c(explained, n_comps_for_095)
-```
-
-```{r}
 variations %>%
   mutate(PC = forcats::fct_inorder(PC)) %>%
   # just take the first 20 because the rest doesn't matter too much anyway
@@ -229,6 +298,12 @@ variations %>%
   ggplot(aes(x = PC, y = VarExplained)) +
   geom_col()
 ```
+
+As `r n_comps_for_095` explain `r explained * 100`% of the variability in our data
+set we can throw out the last `r 20 - n_comps_for_095` components. With this
+additional preprocessing step in place we decided to repeat our initial k-means
+cluster analysis which led to a very similar result. We take this as a further
+indication that $k=2$ is valid.
 
 ```{r}
 set.seed(1337)
@@ -251,14 +326,15 @@ for (center in 1:15) {
 }
 
 kclust_res <- tibble(Centers = centers, TotalWithinss = withinsss)
-kclust_res
-```
 
-```{r}
 ggplot(kclust_res, aes(x = Centers, y = TotalWithinss)) +
   geom_point() +
   geom_line()
 ```
+
+Looking only at the first and the second component we can see that there appears
+pretty high certainty about the first cluster, which appears to be rather dense
+while the second cluster has very fuzzy boundaries and less density.
 
 ```{r}
 set.seed(1337)
@@ -270,6 +346,8 @@ clustered_components <- augment(pca_clust, components)
 ggplot(clustered_components, aes(x = PC01, y = PC02, color = .cluster)) +
   geom_point(size = 2.5)
 ```
+
+## Clustering via HDBSCAN
 
 ```{r}
 library(dbscan)
