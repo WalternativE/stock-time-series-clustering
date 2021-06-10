@@ -26,6 +26,7 @@ library(tsibble)
 library(feasts)
 library(Rcatch22)
 library(janitor)
+library(tidyquant)
 
 ticker_data <- read_csv("data/ticker_values.csv",
                         col_types = cols(
@@ -349,6 +350,16 @@ ggplot(clustered_components, aes(x = PC01, y = PC02, color = .cluster)) +
 
 ## Clustering via HDBSCAN
 
+The problem with k-means (and many other clustering algorithms) is, that regardless
+of whether clusters are valid or not it will form exactly as many clusters as there
+are configured centroids. DBSCAN and HDBSCAN (a hierarchical clustering algorithm
+based on DBSCAN) are alternative algorithms that - in addition to finding clusters
+and classifying observations accordingly - can mark observations as outliers if
+they don't fit any cluster. Using HDBSCAN on our normalized data set (without PCA)
+would yield two clusters, one containing the majority of all observations and one
+containing only four time series. The rest - 60 time series in total - would be
+classified as "too fringe" to be part of any cluster.
+
 ```{r}
 library(dbscan)
 set.seed(1337)
@@ -357,9 +368,16 @@ hdb <- dbscan::hdbscan(prepped_data, minPts = 4)
 hdb
 ```
 
+As HDBSCAN is a hierarchical algorithm we can look at its dendrogram. Given that
+we configured a minimum cluster size of 4 observations the smallest found cluster
+contains exactly 4 observations.
+
 ```{r}
 plot(hdb, show_flat = TRUE)
 ```
+
+In contrast to the k-means clustering we see that the time series clustered together
+have to be far more similar to actually land into the same cluster.
 
 ```{r}
 clustered_data <- bind_cols(prepped_data, list(.cluster = hdb$cluster)) %>%
@@ -370,6 +388,18 @@ clustered_data %>%
   plot_clustered_tickers()
 ```
 
+### The Effects of Dimensionality Reduction on HDBSCAN
+
+As we did in the k-means experiment we also decided to use the HDBSCAN algorithm
+on the data set we reduced by performing a PCA on the normalized feature vectors.
+As we can see this preprocessing allowed us to increase the minimum size of observations
+per cluster while still getting decently sized clusters. As a trade-off the amount
+of outlier observations dramatically increased. From our point it is hard to say
+what would make more sense in regard to the financial domain. From our statistical
+intuition we would assume that a bigger minimum of observations per cluster should
+result in more valid clusters. Because of this we will use dimensionality reduction
+in the rest of the analysis.
+
 ```{r}
 set.seed(1337)
 
@@ -377,14 +407,20 @@ hdb <- dbscan::hdbscan(reduced_components, minPts = 6)
 hdb
 ```
 
+As before we can also inspect the dendrogram, which appears to be flatter and more
+"balanced" than in our first HDBSCAN experiment.
+
 ```{r}
 plot(hdb, show_flat = TRUE)
 ```
 
+As for the clusters there appears to be an even higher similarity between the
+time series in each cluster.
+
 ```{r}
 perform_clustering <- function(.ds, .minPts = 6) {
   set.seed(1337)
-  hdb <- dbscan::hdbscan(reduced_components, minPts = .minPts)
+  hdb <- dbscan::hdbscan(.ds, minPts = .minPts)
   
   bind_cols(.ds, list(.cluster = hdb$cluster)) %>%
     rownames_to_column("ticker")
@@ -398,18 +434,45 @@ clustered_data %>%
   plot_clustered_tickers()
 ```
 
+Looking at the relative composition of each cluster we can see a more interesting
+results than before. The outlier observations as well as the first cluster have
+around 20% to 25% tickers of not closer specified business sectors in them (the
+sample has `r (sum(is.na(ticker_meta$Sector)) / NROW(ticker_meta$Sector)) * 100`%
+unspecified values) while the second cluster only has around 5% not closer specified
+symbols.
+
 ```{r, fig.width=10}
 clustered_data %>%
   enrich_with_meta() %>%
   sector_freq_per_cluster()
 ```
 
-```{r}
-clustered_data %>%
-  select(ticker, .cluster) %>%
-  left_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
-  filter(.cluster == 1)
+In comparison to the relative composition of the complete sample we can see that
+the disperse group of outlier observations is relatively similar while the two
+different clusters are distinctly different.
+
+```{r, fig.width=10}
+ticker_meta %>%
+  group_by(Sector) %>%
+  summarise(count = n()) %>%
+  mutate(freq = count / sum(count)) %>%
+  ggplot(aes(x = Sector, y = freq, color = Sector, fill = Sector)) +
+  geom_col() +
+  coord_flip()
 ```
+
+## Exploring Differences in (Financial) Cluster Performance
+
+As we can see above we can already see distinct differences in business sectors
+which contribute to each cluster. Another interesting piece of additional
+information for us would be if the clusters we found perform differently from their
+base index: the S&P 500.
+
+To compare the differences we make use of the `tidyquant` library, a package that
+includes common functionality used by "quants" (quantitative financial analysts).
+One of these common functionalities is to calculate the return over a period
+(in this case monthly) for a set of assets. In the following example we calculate
+the monthly returns of all tickers in our biggest cluster.
 
 ```{r}
 get_tickers_for_cluster <- function(.clustered, .clust_num) {
@@ -419,12 +482,7 @@ get_tickers_for_cluster <- function(.clustered, .clust_num) {
     (function(x) x$ticker)
 }
 
-clust_one_symbols <- get_tickers_for_cluster(clustered_data, 1)
-clust_one_symbols
-```
-
-```{r}
-library(tidyquant)
+clust_two_symbols <- get_tickers_for_cluster(clustered_data, 2)
 
 get_mreturns_per_ticker_in_range <- function(.tickers, .price_range) {
   min_date <- format(min(.price_range$ref.date), "%Y-%m-%d")
@@ -442,9 +500,13 @@ get_mreturns_per_ticker_in_range <- function(.tickers, .price_range) {
                  col_rename = "Ra")
 }
 
-Ra <- get_mreturns_per_ticker_in_range(clust_one_symbols, prices)
+Ra <- get_mreturns_per_ticker_in_range(clust_two_symbols, prices)
 Ra
 ```
+
+In order to see if our cluster of interest performs better or worse, than the
+index we have to first retrieve the same returns for the S&P 500. The symbol in
+question would be `^GSPC`.
 
 ```{r}
 get_baseline_mreturns_in_range <- function(.price_range) {
@@ -465,10 +527,13 @@ Rb <- get_baseline_mreturns_in_range(prices)
 Rb
 ```
 
-```{r}
-RaRb <- left_join(Ra, Rb, by = "date")
-RaRb
-```
+We can use `tidyquant` to calculate the performance using the monthly returns
+of our cluster assets as well as the baseline. Unfortunately we would need access
+to real domain experts for a thorough analysis of the results. As we are not
+"quants" ourselves we focus on the most intuitive value in the result data set
+which would be the active premium. The active premium is calculated by subtracting
+the baseline annualized returns from the asset annualized returns. So - being very
+reductive - a higher active premium indicates a better performance.
 
 ```{r}
 ticker_performance_against_baseline_in_range <- function(.tickers, .price_range) {
@@ -482,17 +547,28 @@ ticker_performance_against_baseline_in_range <- function(.tickers, .price_range)
                    performance_fun = table.CAPM)
 }
 
-RaRb_capm <- ticker_performance_against_baseline_in_range(clust_one_symbols, prices)
+RaRb_capm <- ticker_performance_against_baseline_in_range(clust_two_symbols, prices)
 RaRb_capm
 ```
+
+If we look at the active premium distribution for our cluster assets we can see
+that the median active premium is `r median(RaRb_capm$ActivePremium) * 100`% while
+the whole distribution generally stayes to the right of the parity line.
 
 ```{r}
 RaRb_capm %>%
   ggplot(aes(x = ActivePremium)) +
-  geom_histogram(binwidth = 0.005)
+  geom_histogram(binwidth = 0.005) +
+  geom_vline(aes(xintercept = median(ActivePremium)), col = "red", size = 1.5)
 ```
 
-## Try out windowing for one 
+## Analysis of Temporal Cluster Stability
+
+Another question we had was whether symbols that get clustered together when looking
+at the complete time frame of available data, show changing cluster membership
+when looking at them in sliding windows. We decided to look at sliding windows
+of three years as those are wide enough to span complete recession events (at
+least in many cases).
 
 ```{r}
 library(slider)
@@ -526,12 +602,8 @@ test_window_prepped_data <- price_range_1999_2001 %>%
   prepare_price_range(.rec = prep_rec) %>%
   extract_pca_components(pca_96_perc_rec)
 
-test_window_prepped_data
-```
-
-```{r}
 test_window_clustered_data <- test_window_prepped_data %>%
-  perform_clustering()
+  perform_clustering(.minPts = 5)
 
 test_window_clustered_data %>%
   join_cluster_with_price_range(.price_range = price_range_1999_2001) %>%
@@ -554,21 +626,24 @@ performance_noise_cluster_test_window
 ```{r}
 performance_noise_cluster_test_window %>%
   ggplot(aes(x = ActivePremium)) +
-  geom_histogram(binwidth = 0.01)
+  geom_histogram(binwidth = 0.01) +
+  geom_vline(aes(xintercept = median(ActivePremium)), col = "red", size = 1.5)
 ```
 
 ```{r}
 get_tickers_for_cluster(test_window_clustered_data, 1) %>%
   ticker_performance_against_baseline_in_range(price_range_1999_2001) %>%
   ggplot(aes(x = ActivePremium)) +
-  geom_histogram(binwidth = 0.01)
+  geom_histogram(binwidth = 0.01) +
+  geom_vline(aes(xintercept = median(ActivePremium)), col = "red", size = 1.5)
 ```
 
 ```{r}
 get_tickers_for_cluster(test_window_clustered_data, 2) %>%
   ticker_performance_against_baseline_in_range(price_range_1999_2001) %>%
   ggplot(aes(x = ActivePremium)) +
-  geom_histogram(binwidth = 0.01)
+  geom_histogram(binwidth = 0.01) +
+  geom_vline(aes(xintercept = median(ActivePremium)), col = "red", size = 1.5)
 ```
 
 ```{r}
@@ -583,7 +658,7 @@ cluster_price_range <- function(.price_range) {
     extract_pca_components(pca_96_perc_rec)
   
   price_range_clustered_data <- price_range_prepped_data %>%
-    perform_clustering()
+    perform_clustering(.minPts = 5)
 
   clustered_ticker_graph <- price_range_clustered_data %>%
     join_cluster_with_price_range(.price_range = .price_range) %>%
@@ -609,24 +684,26 @@ clustered_price_windows <- prices %>%
                .f = (function(x) ungroup(x) %>%
                        as_tsibble(index = ref.date, key = ticker) %>%
                        cluster_price_range()),
-               .before = 2,
+               .before = 7,
                .complete = TRUE)
 ```
 
 ```{r}
-clustered_price_windows[[4]]
+print_window_graphs <- function(window) {
+  window$unclustered_graph %>% print()
+  window$clustered_graph %>% print()
+  window$clustered_sectors %>% print()
+}
+
+clustered_price_windows[[8]] %>% print_window_graphs()
 ```
 
 ```{r}
-clustered_price_windows[[11]]
+clustered_price_windows[[15]] %>% print_window_graphs()
 ```
 
 ```{r}
-clustered_price_windows[[13]]
-```
-
-```{r}
-clustered_price_windows[[22]]
+clustered_price_windows[[22]] %>% print_window_graphs()
 ```
 
 ```{r}
@@ -644,10 +721,6 @@ extract_cluster_info <- function(window_results) {
     rename_with(~ column_label, .cluster)  
 }
 
-extract_cluster_info(clustered_price_windows[[3]])
-```
-
-```{r}
 cluster_membership_over_time <- clustered_price_windows %>%
   compact() %>%
   lapply(extract_cluster_info) %>%
@@ -657,18 +730,35 @@ cluster_membership_over_time
 ```
 
 ```{r}
-cluster_membership_over_time %>%
+cluster_membership_stats <- cluster_membership_over_time %>%
   pivot_longer(cols = c(everything(), -ticker), names_to = "window", values_to = "cluster") %>%
   group_by(ticker) %>%
-  summarise(memberships = length(unique(cluster))) %>%
-  filter(memberships > 1)
+  summarise(memberships = length(unique(cluster)),
+            outlier_count = sum(cluster == 0),
+            first_count = sum(cluster == 1),
+            second_count = sum(cluster == 2),
+            third_count = sum(cluster == 3),
+            fourth_cluster = sum(cluster == 4)) %>%
+  filter(memberships > 1) %>%
+  arrange(outlier_count)
+
+cluster_membership_stats
 ```
 
 ```{r}
+group_cluster_mode <- function(cluster_vec) {
+  cluster_vec %>%
+    table() %>%
+    sort(decreasing = TRUE) %>%
+    (function(x) x[1]) %>%
+    names() %>%
+    as.numeric()
+}
+
 tickers_by_all_time_cluster <- cluster_membership_over_time %>%
   pivot_longer(cols = c(everything(), -ticker), names_to = "window", values_to = "cluster") %>%
   group_by(ticker) %>%
-  summarise(all_time_cluster = cluster %>% first())
+  summarise(mode_cluster = cluster %>% group_cluster_mode())
 
 tickers_by_all_time_cluster
 ```
@@ -687,9 +777,6 @@ get_cluster_performance <- function(window_result) {
     reduce(bind_rows)
 }
 
-get_cluster_performance(clustered_price_windows[[3]])
-```
-```{r}
 cluster_performances_per_period <- clustered_price_windows %>%
   compact() %>%
   lapply(get_cluster_performance) %>%
@@ -706,19 +793,11 @@ cluster_performances_per_period %>%
 ```
 
 ```{r}
-cluster_performances_per_period %>%
-  filter(cluster %in% c(0, 2)) %>%
-  (function(x) aov(cluster ~ median_active_premium, data = x)) %>%
-  summary()
-```
-
-
-```{r}
 cluster_of_interest <- prices %>%
   tibble() %>%
   left_join(tickers_by_all_time_cluster, by = "ticker") %>%
   left_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
-  filter(all_time_cluster == 2) %>%
+  filter(mode_cluster == 2) %>%
   as_tsibble(index = ref.date, key = ticker) %>%
   remove_empty(which = "cols")
 
@@ -733,7 +812,7 @@ cluster_of_interest %>%
 
 ```{r}
 tickers_by_all_time_cluster %>%
-  filter(all_time_cluster == 2) %>%
+  filter(mode_cluster == 2) %>%
   left_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
   select(ticker, Name, Sector, Subsector)
 ```
