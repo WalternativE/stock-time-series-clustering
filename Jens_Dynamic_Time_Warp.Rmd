@@ -3,14 +3,13 @@ title: "Dynamic Time Warp"
 output: html_document
 ---
 
-```{r}
+```{r setup, include=FALSE}
 library(tidyverse)
 library(dtwclust)
 library(tsibble)
 library(feasts)
 library(janitor)
 ```
-
 
 ```{r}
 # Load data
@@ -29,11 +28,46 @@ ticker_data <- read_csv("data/ticker_values.csv",
                         )) %>%
   as_tsibble(key = ticker, index = ref.date)
 
-ticker_data
+ticker_meta <- read_csv(
+  "data/ticker_meta.csv",
+  col_types = cols(
+    .default = col_character(),
+    Round.Lot.Size = col_double()
+)) %>%
+  filter(Name != "Merck & Company, Inc. Common Stock Ex-Distribution When Issued")
 ```
 
 ```{r}
+ticker_meta$Sector %>% unique()
+```
+
+```{r}
+cd_cs_tickers <- ticker_data %>%
+  inner_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
+  select(ticker, Sector) %>%
+  filter(Sector %in% c("Consumer Discretionary", "Consumer Staples"))
+  
+ticker_of_interest <-
+  cd_cs_tickers %>%
+  (function(x) x$ticker) %>%
+  unique()
+
+ticker_of_interest
+```
+
+```{r}
+cd_cs_tickers %>%
+  tibble() %>%
+  select(ticker, Sector) %>%
+  distinct(ticker, Sector) %>%
+  group_by(Sector) %>%
+  summarise(count = n())
+```
+
+
+```{r}
 prices <- ticker_data %>%
+  filter(ticker %in% ticker_of_interest) %>%
   select(price.adjusted, ticker) %>%
   fill_gaps() %>%
   fill(price.adjusted, .direction = "down") %>%
@@ -62,7 +96,7 @@ prices_rowise_rn %>% head()
 
 
 ```{r}
-pc <- tsclust(prices_rowise_rn %>% head(n = 50), type = "partitional", k = 3L, 
+pc <- tsclust(prices_rowise_rn, type = "partitional", k = 2L, 
               distance = "dtw_basic", centroid = "pam", 
               seed = 3247L, trace = TRUE,
               args = tsclust_args(dist = list(window.size = 20L)))
@@ -74,30 +108,5 @@ plot(pc)
 
 
 ```{r}
-#hierarchical
-hc <- tsclust(CharTraj, type = "hierarchical", k = 20L, 
-              distance = "sbd", trace = TRUE,
-              control = hierarchical_control(method = "average"))
-
-
-#fuzzy
-# Calculate autocorrelation up to 50th lag, considering a list of time series as input
-acf_fun <- function(series, ...) {
-    lapply(series, function(x) { as.numeric(acf(x, lag.max = 50L, plot = FALSE)$acf) })
-}
-# Autocorrelation-based fuzzy c-means
-fc <- tsclust(CharTraj[1L:25L], type = "fuzzy", k = 5L,
-              preproc = acf_fun, distance = "L2",
-              seed = 123L)
-fc
+pc
 ```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
