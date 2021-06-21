@@ -1,7 +1,7 @@
 ---
 title: "Data Acquisition"
-date: 2021-05-09
-author: Barkschat Jens, Beyerle Gregor
+date: 2021-06-21
+author: "Barkschat Jens, Beyerle Gregor"
 output:
   html_notebook:
     toc: TRUE
@@ -14,7 +14,7 @@ with regard to their performance (and crisis performance) we'll try to get as ma
 companies, that have been listed in the S&P 500 and exist to this day.
 
 
-```{r}
+```{r setup, include=FALSE}
 library(tidyverse)
 library(tsibble)
 library(feasts)
@@ -62,14 +62,14 @@ still_listed_symbols
 
 ## Collect Ticker Data
 
-We will use the remaining 276 symbols and lookup the daily stock data for them.
+We will use the remaining 273 symbols and lookup the daily stock data for them.
 In the background this will call the Yahoo stock information service.
-We include all datapoints up to 2021-05-09 and try to go back to 1991 so we'd have
+We include all datapoints up to 2021-06-18 and try to go back to 1991 so we'd have
 still a year of data before the dotcom bubble burst.
 
 ```{r}
 start_date <- as.Date("1999-01-01")
-end_date <- as.Date("2021-05-09")
+end_date <- as.Date("2021-06-18")
 freqency <- "daily"
 
 lookup_output <- BatchGetSymbols::BatchGetSymbols(tickers = still_listed_symbols,
@@ -94,12 +94,22 @@ ticker_values <- lookup_output$df.tickers %>%
 ticker_values
 ```
 
+## Collecting Metadata
+
+For analysis purposes it makes sense to collect additional information like
+the sector and sub-sector of a company.
+
+
 ```{r}
 good_to_go_meta <- current_common_exchange_symbols %>%
   filter(Symbol %in% good_to_go_symbols)
 
 good_to_go_meta
 ```
+
+The `SP500_const_info` data frame is unfortunately not always up to date so there
+is a considerable amount of missing data points for our data set. Still, there
+is enough data to use in our analysis.
 
 ```{r}
 additional_meta <- SP500_const_info %>%
@@ -108,6 +118,10 @@ additional_meta <- SP500_const_info %>%
 
 additional_meta
 ```
+
+In the end we decided to keep eight attributes in case we need them in further
+analysis. The most useful of them being the name, the symbol as an identifier,
+the secotr and the subsector.
 
 ```{r}
 complete_meta <- good_to_go_meta %>%

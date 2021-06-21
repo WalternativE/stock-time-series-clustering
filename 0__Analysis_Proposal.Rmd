@@ -1,9 +1,9 @@
 ---
-title: "ALGO2 - Analysis Proposal"
+title: "Analysis Proposal"
 output:
   html_notebook:
     toc: TRUE
-date: 2021-05-09
+date: 2021-06-21
 author: "Barkschat Jens, Beyerle Gregor"
 ---
 
@@ -33,10 +33,13 @@ index as it is rather broad high-quality index. We will use it to find possible
 companies to include in our analysis. The complete process how we constructed our
 dataset can be found in the `1__Data_Acquisition.Rmd` file.
 
-```{r}
+```{r setup, include=FALSE}
 library(tidyverse)
 library(tsibble)
+```
 
+
+```{r, warning=FALSE}
 ticker_data <- read_csv("data/ticker_values.csv",
                         col_types = cols(
                           price.open = col_double(),
@@ -57,13 +60,11 @@ ticker_data
 
 We will mostly focus on the "simple" values in this dataset:
 
-- `price.open` the price when the market opened in USD
-- `price.high` the highest price on that day in USD
-- `price.low` the lowest price on that day in USD
+- `price.adjusted` the closing prices in USD adjusted for stock splits and dividend payouts
 - `ref.date` the date of this observation
 - `ticker` the ticker symbol of the stock
 
-Our dataset contains 216 ticker symbols with `r nrow(ticker_data %>% filter(ticker == "AAPL"))`
+Our dataset contains 215 ticker symbols with `r nrow(ticker_data %>% filter(ticker == "AAPL"))`
 observations each. Observations can only happen on days where the markets are open
 so the gaps should be easy to fill.
 
@@ -76,3 +77,4 @@ We plan to learn the following things:
 - Perform different clustering techniques and compare their results with common domain knowledge
 - Compare changes in clusters over different time frames especially in relation to
   different phases in economic growth cycles
+- Analyze a possible use of dynamic time warping instead of using time series features

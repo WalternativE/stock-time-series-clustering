@@ -67,7 +67,6 @@ COP,ConocoPhillips Common Stock,NYSE,100,NA,NA,Energy,Oil & Gas Exploration & Pr
 CPB,Campbell Soup Company Common Stock,NYSE,100,NA,NA,Consumer Staples,Packaged Foods & Meats
 CR,Crane Co. Common Stock,NYSE,100,NA,NA,NA,NA
 CSR,D/B/A Centerspace Common Stock,NYSE,100,NA,NA,NA,NA
-CTB,Cooper Tire & Rubber Company Common Stock,NYSE,100,NA,NA,NA,NA
 CVS,CVS Health Corporation Common Stock,NYSE,100,NA,NA,Consumer Staples,Drug Retail
 CVX,Chevron Corporation Common Stock,NYSE,100,NA,NA,Energy,Integrated Oil & Gas
 D,"Dominion Energy, Inc. Common Stock",NYSE,100,NA,NA,Utilities,Electric Utilities
@@ -79,6 +78,7 @@ DLX,Deluxe Corporation Common Stock,NYSE,100,NA,NA,NA,NA
 DOV,Dover Corporation Common Stock,NYSE,100,NA,NA,Industrials,Industrial Machinery
 DRI,"Darden Restaurants, Inc. Common Stock",NYSE,100,NA,NA,Consumer Discretionary,Restaurants
 DTE,DTE Energy Company Common Stock,NYSE,100,NA,NA,Utilities,MultiUtilities
+DTE,DTE Energy Company Common Stock Ex-Distribution When Issued,NYSE,100,NA,NA,Utilities,MultiUtilities
 DUK,Duke Energy Corporation (Holding Company) Common Stock,NYSE,100,NA,NA,Utilities,Electric Utilities
 DXC,DXC Technology Company Common Stock ,NYSE,100,NA,NA,NA,NA
 ECL,Ecolab Inc. Common Stock,NYSE,100,NA,NA,Materials,Specialty Chemicals
@@ -151,7 +151,6 @@ MMM,3M Company Common Stock,NYSE,100,NA,NA,Industrials,Industrial Conglomerates
 MNR,Monmouth Real Estate Investment Corporation Class A Common Stock,NYSE,100,NA,NA,NA,NA
 MO,"Altria Group, Inc.",NYSE,100,NA,NA,Consumer Staples,Tobacco
 MRK,"Merck & Company, Inc. Common Stock (new)",NYSE,100,NA,NA,Health Care,Pharmaceuticals
-MRK,"Merck & Company, Inc. Common Stock Ex-Distribution When Issued",NYSE,100,NA,NA,Health Care,Pharmaceuticals
 MRO,Marathon Oil Corporation Common Stock,NYSE,100,NA,NA,Energy,Oil & Gas Exploration & Production
 MS,Morgan Stanley Common Stock,NYSE,100,NA,NA,Financials,Investment Banking & Brokerage
 MSI,"Motorola Solutions, Inc. Common Stock",NYSE,100,NA,NA,Information Technology,Telecommunications Equipment
