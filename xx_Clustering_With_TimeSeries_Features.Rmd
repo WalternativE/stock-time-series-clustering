@@ -21,6 +21,10 @@ look at their composition (which kind of companies can be found in these cluster
 and at differences in their performance.
 
 ```{r setup, include = FALSE}
+knitr::opts_chunk$set(error = FALSE,
+                      warning = FALSE,
+                      echo = FALSE)
+
 library(tidyverse)
 library(tsibble)
 library(feasts)
@@ -588,6 +592,11 @@ windowed_prices <- prices %>%
                .complete = TRUE)
 ```
 
+We began with looking at the first window from 1999 to 2002 to see if we could
+find a pattern similar to the ones we observed when looking at the complete time
+frame. The data - of course - looks exactly as we saw it before, just focuseed on
+the first three years.
+
 ```{r}
 price_range_1999_2001 <- windowed_prices[[3]]
 
@@ -596,6 +605,9 @@ price_range_1999_2001 %>%
   geom_line()
 ```
 
+Unfortunately we already see, that if we stick with the default minimal number of
+points in a cluster we only see 'noise'. There are no clusters to see.
+
 ```{r}
 test_window_prepped_data <- price_range_1999_2001 %>%
   features_for_price_range() %>%
@@ -603,48 +615,15 @@ test_window_prepped_data <- price_range_1999_2001 %>%
   extract_pca_components(pca_96_perc_rec)
 
 test_window_clustered_data <- test_window_prepped_data %>%
-  perform_clustering(.minPts = 5)
+  perform_clustering()
 
 test_window_clustered_data %>%
   join_cluster_with_price_range(.price_range = price_range_1999_2001) %>%
   plot_clustered_tickers()
 ```
 
-```{r, fig.width=10}
-test_window_clustered_data %>%
-  enrich_with_meta() %>%
-  sector_freq_per_cluster()
-```
-
-```{r}
-performance_noise_cluster_test_window <- get_tickers_for_cluster(test_window_clustered_data, 0) %>%
-  ticker_performance_against_baseline_in_range(price_range_1999_2001)
-
-performance_noise_cluster_test_window
-```
-
-```{r}
-performance_noise_cluster_test_window %>%
-  ggplot(aes(x = ActivePremium)) +
-  geom_histogram(binwidth = 0.01) +
-  geom_vline(aes(xintercept = median(ActivePremium)), col = "red", size = 1.5)
-```
-
-```{r}
-get_tickers_for_cluster(test_window_clustered_data, 1) %>%
-  ticker_performance_against_baseline_in_range(price_range_1999_2001) %>%
-  ggplot(aes(x = ActivePremium)) +
-  geom_histogram(binwidth = 0.01) +
-  geom_vline(aes(xintercept = median(ActivePremium)), col = "red", size = 1.5)
-```
-
-```{r}
-get_tickers_for_cluster(test_window_clustered_data, 2) %>%
-  ticker_performance_against_baseline_in_range(price_range_1999_2001) %>%
-  ggplot(aes(x = ActivePremium)) +
-  geom_histogram(binwidth = 0.01) +
-  geom_vline(aes(xintercept = median(ActivePremium)), col = "red", size = 1.5)
-```
+Of course, we can increase the window length and decrease the minimum amount of
+points per cluster and see if we can get some sort of stability this way.
 
 ```{r}
 cluster_price_range <- function(.price_range) {
@@ -688,23 +667,11 @@ clustered_price_windows <- prices %>%
                .complete = TRUE)
 ```
 
-```{r}
-print_window_graphs <- function(window) {
-  window$unclustered_graph %>% print()
-  window$clustered_graph %>% print()
-  window$clustered_sectors %>% print()
-}
-
-clustered_price_windows[[8]] %>% print_window_graphs()
-```
-
-```{r}
-clustered_price_windows[[15]] %>% print_window_graphs()
-```
-
-```{r}
-clustered_price_windows[[22]] %>% print_window_graphs()
-```
+With a window size of 7 we still get 14 windows. We can collect the cluster membership
+over time and see if there is some sort of stability (or at least an interesting
+descriptive statistic). Again we fail to see a clear trend within the data. Most
+stocks appear to be treated as noise most of the time while switching cluster
+membership ever now and then.
 
 ```{r}
 label_for_price_range <- function(price_range) {
@@ -729,6 +696,13 @@ cluster_membership_over_time <- clustered_price_windows %>%
 cluster_membership_over_time
 ```
 
+We can count how often our time series "change membership" and how often each label
+is applied to them. As the cluster label isn't learned in the sense of a supervised
+or semi-supervised algorithm these labels don't mean a lot (neither do they
+guarantee that the same label means the same thing in the same context). In the
+context of this hierarchical clustering we just assume, that a label moniker
+means the same thing over time.
+
 ```{r}
 cluster_membership_stats <- cluster_membership_over_time %>%
   pivot_longer(cols = c(everything(), -ticker), names_to = "window", values_to = "cluster") %>%
@@ -744,6 +718,11 @@ cluster_membership_stats <- cluster_membership_over_time %>%
 
 cluster_membership_stats
 ```
+
+As we'd still like to compare the different clusters (even in this windowed form)
+we have to summarize the results in some at least partially meaningful way. We chose
+to take the mode of the cluster label or each stock as a method to say "this stock
+belongs to this cluster". As we've already discussed most of them would be "noise".
 
 ```{r}
 group_cluster_mode <- function(cluster_vec) {
@@ -762,6 +741,10 @@ tickers_by_all_time_cluster <- cluster_membership_over_time %>%
 
 tickers_by_all_time_cluster
 ```
+
+If we look at the different performance of each cluster we see a picture, that
+could be interpreted as pointing in the direction, that there are some clusters
+which have some temporal stability and perform better than the base line index.
 
 ```{r}
 get_cluster_performance <- function(window_result) {
@@ -782,37 +765,17 @@ cluster_performances_per_period <- clustered_price_windows %>%
   lapply(get_cluster_performance) %>%
   reduce(bind_rows)
 
-cluster_performances_per_period
-```
-
-```{r}
 cluster_performances_per_period %>%
   mutate(cluster = as_factor(cluster)) %>%
   ggplot(aes(x = cluster, y = median_active_premium, fill = cluster)) +
   geom_violin()
 ```
 
-```{r}
-cluster_of_interest <- prices %>%
-  tibble() %>%
-  left_join(tickers_by_all_time_cluster, by = "ticker") %>%
-  left_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
-  filter(mode_cluster == 2) %>%
-  as_tsibble(index = ref.date, key = ticker) %>%
-  remove_empty(which = "cols")
-
-cluster_of_interest
-```
-
-```{r}
-cluster_of_interest %>%
-  ggplot(aes(x = ref.date, standardized_price, group = ticker)) +
-  geom_line()
-```
-
-```{r}
-tickers_by_all_time_cluster %>%
-  filter(mode_cluster == 2) %>%
-  left_join(ticker_meta, by = c("ticker" = "Symbol")) %>%
-  select(ticker, Name, Sector, Subsector)
-```
+Looking at the sizes of each clusters and the flaky (at best) methods we used to
+get to these outcomes we'd conclude that it does not appear to be possible to
+use these time series characteristics to find the best all-time-well-performing
+stocks in comparison to a base index. Of course, there are other methods to find
+more subtle similarities between time series. Dynamic time warping would offer a
+distance metric which does not need to reduce the temporal information in the same
+way as computing time series features would. In any case further investigation
+would be needed.

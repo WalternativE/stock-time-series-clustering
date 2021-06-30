@@ -34,6 +34,10 @@ companies to include in our analysis. The complete process how we constructed ou
 dataset can be found in the `1__Data_Acquisition.Rmd` file.
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(error = FALSE,
+                      warning = FALSE,
+                      echo = FALSE)
+
 library(tidyverse)
 library(tsibble)
 ```

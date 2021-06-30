@@ -15,6 +15,10 @@ companies, that have been listed in the S&P 500 and exist to this day.
 
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(error = FALSE,
+                      warning = FALSE,
+                      echo = FALSE)
+
 library(tidyverse)
 library(tsibble)
 library(feasts)
