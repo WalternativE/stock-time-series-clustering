@@ -1,1 +1,2 @@
+data/ticker_values.csv filter=lfs diff=lfs merge=lfs -text
 /data/ticker_values.csv filter=lfs diff=lfs merge=lfs -text
